@@ -1,0 +1,38 @@
+# Ignore user-specific files
+*.user
+*.suo
+
+# Ignore build output
+bin/
+obj/
+out/
+
+# Ignore published files
+*.publishsettings
+*.pdb
+
+# Ignore Rider, VSCode, Visual Studio folders
+.vscode/
+.idea/
+*.sln.iml
+
+# Ignore logs
+*.log
+
+# Ignore secrets
+appsettings.Development.json
+secrets.json
+
+# Ignore EF Core migrations if unwanted
+
+# Ignore Docker
+**/docker-compose.*
+docker-compose*
+
+# Ignore environment files
+.env
+.env.*
+
+# Don't ignore main appsettings
+!appsettings.json
+.vs
