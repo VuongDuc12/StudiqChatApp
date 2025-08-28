@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Ucm.Application.IServices;
 using Ucm.Application.Services;
+using Ucm.Application.Services.Chat;
 namespace Ucm.Application
 {
     public static class DependencyInjection
@@ -25,6 +26,7 @@ namespace Ucm.Application
 
             services.AddScoped<CourseService>();
             services.AddScoped<CourseTopicService>();
+            services.AddScoped<FriendService>();
             return services;
         }
     }

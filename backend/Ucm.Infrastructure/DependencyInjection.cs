@@ -9,10 +9,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Ucm.Domain.Entities;
 using Ucm.Domain.IRepositories;
+using Ucm.Domain.IRepositories.Chat;
 using Ucm.Infrastructure.Common.Mappers;
 using Ucm.Infrastructure.Data;
 using Ucm.Infrastructure.Data.Models;
 using Ucm.Infrastructure.Repositories;
+using Ucm.Infrastructure.Repositories.Chat;
 
 namespace Ucm.Infrastructure
 {
@@ -33,7 +35,8 @@ namespace Ucm.Infrastructure
             services.AddScoped<ICourseTopicRepository, CourseTopicRepository>();
             services.AddScoped<ITaskResourceRepository, TaskResourceRepository>();
             services.AddScoped<IStudyLogRepository, StudyLogRepository>();
-
+            services.AddScoped<IFriendRepository, FriendRepository>();
+            services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
 
             services.AddScoped<IEntityEfMapper<Course, CourseEf>, CourseEntityEfMapper>();
             services.AddScoped<IEntityEfMapper<CourseTopic, CourseTopicEf>, CourseTopicEntityEfMapper>();

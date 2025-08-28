@@ -14,8 +14,8 @@ namespace Ucm.Domain.Entities
         public string FullName { get; set; }
         public string Email { get; set; }
 
-        public ICollection<UserEnrollment> Enrollments { get; set; }
-        public ICollection<StudyPlan> StudyPlans { get; set; }
+    public ICollection<UserEnrollment>? Enrollments { get; set; }
+    public ICollection<StudyPlan>? StudyPlans { get; set; }
     }
 
 

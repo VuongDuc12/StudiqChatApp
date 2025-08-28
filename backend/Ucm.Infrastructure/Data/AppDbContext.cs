@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Ucm.Infrastructure.Data.Models;
+using Ucm.Infrastructure.Data.Models.Chat;
 
 namespace Ucm.Infrastructure.Data
 {
@@ -21,9 +22,99 @@ namespace Ucm.Infrastructure.Data
         public DbSet<TemplateStudyTaskEf> TemplateStudyTasks { get; set; }
         public DbSet<TemplateTaskResourceEf> TemplateTaskResources { get; set; }
 
+
+    public DbSet<FriendRequestEf> FriendRequests { get; set; }
+    public DbSet<FriendEf> Friends { get; set; }
+    public DbSet<ConversationEf> Conversations { get; set; }
+    public DbSet<ConversationMemberEf> ConversationMembers { get; set; }
+    public DbSet<MessageEf> Messages { get; set; }
+    public DbSet<ChatNotificationEf> ChatNotifications { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+        // Chat Entities configuration (EF)
+        builder.Entity<FriendRequestEf>(entity =>
+        {
+            entity.ToTable("friend_requests");
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.FromUser)
+                .WithMany()
+                .HasForeignKey(e => e.FromUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.ToUser)
+                .WithMany()
+                .HasForeignKey(e => e.ToUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<FriendEf>(entity =>
+        {
+            entity.ToTable("friends");
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.FriendUser)
+                .WithMany()
+                .HasForeignKey(e => e.FriendId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<ConversationEf>(entity =>
+        {
+            entity.ToTable("conversations");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).HasMaxLength(100);
+            entity.Property(e => e.AvatarUrl).HasMaxLength(255);
+            entity.HasOne(e => e.Creator)
+                .WithMany()
+                .HasForeignKey(e => e.CreatedBy)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<ConversationMemberEf>(entity =>
+        {
+            entity.ToTable("conversation_members");
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.Conversation)
+                .WithMany(c => c.Members)
+                .HasForeignKey(e => e.ConversationId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<MessageEf>(entity =>
+        {
+            entity.ToTable("messages");
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.Conversation)
+                .WithMany(c => c.Messages)
+                .HasForeignKey(e => e.ConversationId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Sender)
+                .WithMany()
+                .HasForeignKey(e => e.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.ReplyToMessage)
+                .WithMany()
+                .HasForeignKey(e => e.ReplyToMessageId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        builder.Entity<ChatNotificationEf>(entity =>
+        {
+            entity.ToTable("chat_notifications");
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
 
             // Đổi tên bảng cho Identity (PostgreSQL thường dùng snake_case)
             builder.Entity<AppUserEF>().ToTable("users");
