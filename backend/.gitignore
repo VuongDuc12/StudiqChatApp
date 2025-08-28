@@ -36,3 +36,5 @@ docker-compose*
 # Don't ignore main appsettings
 !appsettings.json
 .vs
+
+Migrations
