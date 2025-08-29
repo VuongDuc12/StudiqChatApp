@@ -1,15 +1,17 @@
 "use client";
 import React, { useState } from "react";
-import toast from "react-hot-toast";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
-export default function DangNhapPage() {
-  const [form, setForm] = useState({ username: "", password: "" });
+export default function RegisterPage() {
+  const [form, setForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+    fullName: "",
+  });
   const [loading, setLoading] = useState(false);
-  // const [error, setError] = useState("");
+  const [error, setError] = useState("");
   const router = useRouter();
-  const params = useSearchParams();
-  const registered = params.get("registered");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -18,31 +20,18 @@ export default function DangNhapPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-  // clear error
+    setError("");
     try {
-      const res = await fetch("http://localhost:5210/api/Auth/login", {
+      const res = await fetch("http://localhost:5210/api/Auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      if (!res.ok) throw new Error("Đăng nhập thất bại");
       const data = await res.json();
-      if (data.success && data.data && data.data.token) {
-        localStorage.setItem("token", data.data.token);
-        localStorage.setItem("user", JSON.stringify({
-          id: data.data.id,
-          username: data.data.username,
-          fullName: data.data.fullName,
-          email: data.data.email,
-          roles: data.data.roles
-        }));
-        toast.success("Đăng nhập thành công!");
-        router.push("/");
-      } else {
-        throw new Error("Sai thông tin đăng nhập");
-      }
+      if (!res.ok || !data.success) throw new Error(data.message || "Đăng ký thất bại");
+      router.push("/auth?registered=1");
     } catch (err: any) {
-      toast.error(err.message || "Đăng nhập thất bại");
+      setError(err.message || "Đăng ký thất bại");
     } finally {
       setLoading(false);
     }
@@ -51,16 +40,17 @@ export default function DangNhapPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#23272a]">
       <form onSubmit={handleSubmit} className="bg-[#36393f] p-8 rounded-xl shadow-lg w-full max-w-md flex flex-col gap-4">
-        <h2 className="text-2xl font-bold text-white mb-2">Đăng nhập</h2>
-  {registered && toast.success("Đăng ký thành công! Vui lòng đăng nhập.")}
+        <h2 className="text-2xl font-bold text-white mb-2">Đăng ký tài khoản</h2>
         <input name="username" placeholder="Tên đăng nhập" value={form.username} onChange={handleChange} required className="px-4 py-2 rounded bg-[#23272a] text-white" />
+        <input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange} required className="px-4 py-2 rounded bg-[#23272a] text-white" />
+        <input name="fullName" placeholder="Họ tên" value={form.fullName} onChange={handleChange} required className="px-4 py-2 rounded bg-[#23272a] text-white" />
         <input name="password" type="password" placeholder="Mật khẩu" value={form.password} onChange={handleChange} required className="px-4 py-2 rounded bg-[#23272a] text-white" />
-  {/* toast only, no in-page error */}
+        {error && <div className="text-red-400 text-sm">{error}</div>}
         <button type="submit" className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 rounded transition" disabled={loading}>
-          {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+          {loading ? "Đang đăng ký..." : "Đăng ký"}
         </button>
         <div className="text-gray-400 text-sm text-center mt-2">
-          Chưa có tài khoản? <a href="/auth/register" className="text-indigo-400 hover:underline">Đăng ký</a>
+          Đã có tài khoản? <a href="/auth" className="text-indigo-400 hover:underline">Đăng nhập</a>
         </div>
       </form>
     </div>

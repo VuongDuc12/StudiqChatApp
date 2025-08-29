@@ -25,59 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${inter.variable} ${geistMono.variable} antialiased`}>
         <Toaster
           position="bottom-right"
-          toastOptions={{
-            style: {
-              borderRadius: '18px',
-              background: '#fff',
-              color: '#4c1d95',
-              fontFamily: 'var(--font-inter), sans-serif',
-              fontWeight: 600,
-              fontSize: '1.08rem',
-              boxShadow: '0 8px 32px 0 rgba(99,102,241,0.18)',
-              padding: '20px 32px 20px 20px',
-              border: '2px solid #a21caf',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '16px',
-              minWidth: 340,
-              maxWidth: 400,
-              transition: 'box-shadow 0.2s',
-            },
-            iconTheme: {
-              primary: '#a21caf',
-              secondary: '#fff',
-            },
-            success: {
-              icon: <FiCheckCircle size={28} color="#22d3ee" />,
-              style: {
-                background: '#f0f9ff',
-                color: '#0e1726',
-                borderLeft: '6px solid #22d3ee',
-                fontWeight: 700,
-                fontFamily: 'var(--font-inter), sans-serif',
-              },
-            },
-            error: {
-              icon: <FiXCircle size={28} color="#f43f5e" />,
-              style: {
-                background: '#fff1f2',
-                color: '#b91c1c',
-                borderLeft: '6px solid #f43f5e',
-                fontWeight: 700,
-                fontFamily: 'var(--font-inter), sans-serif',
-              },
-            },
-            loading: {
-              icon: <FiLoader size={28} color="#6366f1" className="animate-spin" />,
-              style: {
-                background: '#f3f4f6',
-                color: '#4c1d95',
-                borderLeft: '6px solid #6366f1',
-                fontWeight: 700,
-                fontFamily: 'var(--font-inter), sans-serif',
-              },
-            },
-          }}
+         
         />
         {children}
       </body>

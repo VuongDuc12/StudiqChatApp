@@ -125,6 +125,12 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
                   <span>{item.label}</span>
                 </Link>
               ))}
+              <Link
+                href="/Chat"
+                className="ml-4 px-4 py-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold shadow hover:scale-105 transition-all duration-200"
+              >
+                Tham gia Chat
+              </Link>
             </nav>
             {/* Auth Buttons */}
             <div className="hidden md:flex items-center gap-2 ml-4">
