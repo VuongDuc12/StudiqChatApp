@@ -1,3 +1,4 @@
+
 using Ucm.Domain.Entities;
 using Ucm.Domain.Entities.Chat;
 using Ucm.Domain.IRepositories.Chat;
@@ -6,6 +7,7 @@ namespace Ucm.Application.Services.Chat
 {
     public class FriendService
     {
+
         private readonly IFriendRepository _friendRepo;
         private readonly IFriendRequestRepository _friendRequestRepo;
         public FriendService(IFriendRepository friendRepo, IFriendRequestRepository friendRequestRepo)
@@ -74,5 +76,9 @@ namespace Ucm.Application.Services.Chat
         // Lấy danh sách lời mời kết bạn nhận được
         public Task<List<FriendRequest>> GetReceivedRequestsAsync(Guid userId)
             => _friendRequestRepo.GetReceivedRequestsAsync(userId);
+
+        // Lấy chi tiết một lời mời kết bạn theo Id
+        public Task<FriendRequest?> GetFriendRequestByIdAsync(Guid requestId)
+            => _friendRequestRepo.GetByIdAsync(requestId);
     }
 }

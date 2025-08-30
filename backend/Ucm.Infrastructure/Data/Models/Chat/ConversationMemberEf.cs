@@ -12,5 +12,7 @@ namespace Ucm.Infrastructure.Data.Models.Chat
     public AppUserEF? User { get; set; }
         public DateTime JoinedAt { get; set; }
         public int Role { get; set; } // 0=Member, 1=Admin, 2=Owner
+    public int UnreadCount { get; set; }
+    public DateTime? LastReadAt { get; set; }
     }
 }

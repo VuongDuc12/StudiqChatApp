@@ -27,6 +27,8 @@ namespace Ucm.Application
             services.AddScoped<CourseService>();
             services.AddScoped<CourseTopicService>();
             services.AddScoped<FriendService>();
+            services.AddScoped<ChatNotificationService>();
+            services.AddScoped<Ucm.Application.IServices.Chat.IConversationService, Ucm.Application.Services.Chat.ConversationService>();
             return services;
         }
     }

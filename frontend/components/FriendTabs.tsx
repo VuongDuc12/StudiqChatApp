@@ -1,20 +1,27 @@
 
 
 "use client";
+import Swal from 'sweetalert2';
+
 import React, { useEffect, useState } from "react";
 import { FiUserPlus, FiUsers, FiList } from "react-icons/fi";
 import toast from "react-hot-toast";
+import withReactContent from "sweetalert2-react-content";
+
+import api from "@/lib/api";
 
 
 
 const defaultAvatar = "https://ui-avatars.com/api/?name=User&background=5865f2&color=fff&rounded=true&size=64";
 
+interface StartChatPayload { id: string; username?: string; avatarUrl?: string | null }
 interface FriendTabsProps {
   tab: string;
   setTab: (tab: string) => void;
+  onStartChat?: (payload: StartChatPayload) => void;
 }
 
-export default function FriendTabs({ tab, setTab }: FriendTabsProps) {
+export default function FriendTabs({ tab, setTab, onStartChat }: FriendTabsProps) {
   // State
   const [friends, setFriends] = useState<any[]>([]);
   const [invites, setInvites] = useState<any[]>([]);
@@ -22,41 +29,46 @@ export default function FriendTabs({ tab, setTab }: FriendTabsProps) {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [addLoading, setAddLoading] = useState(false);
+  const MySwal = withReactContent(Swal);
+
   // Removed error/success state, use toast only
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : "";
 
   // Fetch friends
-  useEffect(() => {
+  const fetchFriends = async () => {
     if (!token) return;
-    fetch("http://localhost:5210/api/Friends", {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(r => r.json())
-      .then(d => setFriends(d.data || []));
-  }, [token]);
+    try {
+      const res = await api.get("/Friends");
+      setFriends(res.data.data || []);
+    } catch {}
+  };
 
   // Fetch invites
-  useEffect(() => {
+  const fetchInvites = async () => {
     if (!token) return;
-    fetch("http://localhost:5210/api/Friends/received-requests", {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(r => r.json())
-      .then(d => setInvites(d.data || []));
-  }, [token]);
+    try {
+      const res = await api.get("/Friends/received-requests");
+      setInvites(res.data.data || []);
+    } catch {}
+  };
+
+  useEffect(() => { fetchFriends(); }, [token]);
+  useEffect(() => { fetchInvites(); }, [token]);
+
+  // Reload dữ liệu khi chuyển tab
+  useEffect(() => {
+    if (tab === "online" || tab === "all") fetchFriends();
+    if (tab === "invites") fetchInvites();
+  }, [tab]);
 
   // Search user
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setSearchLoading(true);
-  // clear notifications
     try {
-      const res = await fetch(`http://localhost:5210/api/Friends/search?keyword=${encodeURIComponent(search)}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      setSearchResults(data.data || []);
-      if (!data.data || data.data.length === 0) toast.error("Không tìm thấy người dùng.");
+      const res = await api.get(`/Friends/search?keyword=${encodeURIComponent(search)}`);
+      setSearchResults(res.data.data || []);
+      if (!res.data.data || res.data.data.length === 0) toast.error("Không tìm thấy người dùng.");
     } catch {
       toast.error("Không tìm thấy người dùng.");
     } finally {
@@ -67,15 +79,9 @@ export default function FriendTabs({ tab, setTab }: FriendTabsProps) {
   // Send friend request
   const handleAddFriend = async (userId: string) => {
     setAddLoading(true);
-  // clear notifications
     try {
-      const res = await fetch("http://localhost:5210/api/Friends/request", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify(userId)
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.message || "Gửi lời mời thất bại");
+      const res = await api.post("/Friends/request", userId);
+      if (!res.data.success) throw new Error(res.data.message || "Gửi lời mời thất bại");
       toast.success("Đã gửi lời mời kết bạn!");
     } catch (err: any) {
       toast.error(err.message || "Gửi lời mời thất bại");
@@ -84,32 +90,40 @@ export default function FriendTabs({ tab, setTab }: FriendTabsProps) {
     }
   };
 
+
   // Accept invite
   const handleAccept = async (inviteId: string) => {
-  // clear notifications
     try {
-      const res = await fetch(`http://localhost:5210/api/Friends/accept/${inviteId}`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-  if (!data.success) throw new Error(data.message || "Chấp nhận thất bại");
-  toast.success("Đã chấp nhận lời mời!");
-      // Refresh invites & friends
-      fetch("http://localhost:5210/api/Friends/received-requests", {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-        .then(r => r.json())
-        .then(d => setInvites(d.data || []));
-      fetch("http://localhost:5210/api/Friends", {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-        .then(r => r.json())
-        .then(d => setFriends(d.data || []));
+      const res = await api.post(`/Friends/accept/${inviteId}`);
+      if (!res.data.success) throw new Error(res.data.message || "Chấp nhận thất bại");
+      toast.success("Đã chấp nhận lời mời!");
+      await fetchInvites();
+      await fetchFriends();
     } catch (err: any) {
       toast.error(err.message || "Chấp nhận thất bại");
     }
   };
+
+  // Remove friend
+  const handleRemoveFriend = async (friendId: string) => {
+  const result = await MySwal.fire({
+    title: 'Bạn có chắc chắn?',
+    text: 'Xóa bạn bè sẽ không thể hoàn tác!',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Xóa',
+    cancelButtonText: 'Hủy'
+  });
+  if (!result.isConfirmed) return;
+  try {
+  const res = await api.delete(`/Friends/remove?friendId=${friendId}`);
+  if (!res.data.success) throw new Error(res.data.message || "Xóa bạn thất bại");
+  toast.success("Đã xóa bạn bè!");
+  await fetchFriends();
+  } catch (err: any) {
+    toast.error(err.message || "Xóa bạn thất bại");
+  }
+};
 
   return (
     <div className="flex flex-col h-full">
@@ -153,8 +167,8 @@ export default function FriendTabs({ tab, setTab }: FriendTabsProps) {
   <div className="flex-1 overflow-y-auto bg-[#36393f] p-8 font-inter">
         {tab === "online" && (
           <ul className="space-y-4">
-            {friends.map(f => (
-              <li key={f.id} className="flex items-center gap-4 p-4 rounded-2xl bg-[#23272a] hover:bg-[#393c41] transition shadow group cursor-pointer">
+        {friends.map(f => (
+          <li key={f.id} onClick={() => { const rid = f.friend?.id || f.user?.id; const uname = f.friend?.username || f.user?.username; const avatar = f.friend?.avatarUrl || f.user?.avatarUrl || null; if (rid && typeof onStartChat === 'function') onStartChat({ id: rid, username: uname, avatarUrl: avatar }); }} className="flex items-center gap-4 p-4 rounded-2xl bg-[#23272a] hover:bg-[#393c41] transition shadow group cursor-pointer">
                 <div className="relative">
                   <img
                     src={defaultAvatar}
@@ -163,10 +177,16 @@ export default function FriendTabs({ tab, setTab }: FriendTabsProps) {
                   />
                   <span className="absolute bottom-1 right-1 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></span>
                 </div>
-                <div className="flex flex-col justify-center">
+                <div className="flex flex-col justify-center flex-1">
                   <span className="text-white font-bold text-lg tracking-wide">{f.friend?.username || f.user?.username}</span>
                   <span className="text-green-400 text-xs font-medium">Bạn bè</span>
                 </div>
+                <button
+                  className="ml-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold transition"
+                  onClick={(e) => { e.stopPropagation(); handleRemoveFriend(f.friend?.id || f.user?.id); }}
+                >
+                  Xóa bạn
+                </button>
               </li>
             ))}
           </ul>

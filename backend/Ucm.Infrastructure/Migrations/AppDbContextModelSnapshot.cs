@@ -233,6 +233,9 @@ namespace Ucm.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("FromUserId")
+                        .HasColumnType("uuid");
+
                     b.Property<bool>("IsRead")
                         .HasColumnType("boolean");
 
@@ -243,6 +246,8 @@ namespace Ucm.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FromUserId");
 
                     b.HasIndex("UserId");
 
@@ -266,6 +271,15 @@ namespace Ucm.Infrastructure.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("LastMessageAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("LastMessageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("LastMessagePreview")
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -276,7 +290,11 @@ namespace Ucm.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedAt");
+
                     b.HasIndex("CreatedBy");
+
+                    b.HasIndex("LastMessageAt");
 
                     b.ToTable("conversations", (string)null);
                 });
@@ -293,7 +311,13 @@ namespace Ucm.Infrastructure.Migrations
                     b.Property<DateTime>("JoinedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime?>("LastReadAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UnreadCount")
                         .HasColumnType("integer");
 
                     b.Property<Guid>("UserId")
@@ -301,9 +325,10 @@ namespace Ucm.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ConversationId");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("ConversationId", "UserId")
+                        .IsUnique();
 
                     b.ToTable("conversation_members", (string)null);
                 });
@@ -398,11 +423,11 @@ namespace Ucm.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ConversationId");
-
                     b.HasIndex("ReplyToMessageId");
 
                     b.HasIndex("SenderId");
+
+                    b.HasIndex("ConversationId", "CreatedAt");
 
                     b.ToTable("messages", (string)null);
                 });
@@ -805,11 +830,17 @@ namespace Ucm.Infrastructure.Migrations
 
             modelBuilder.Entity("Ucm.Infrastructure.Data.Models.Chat.ChatNotificationEf", b =>
                 {
+                    b.HasOne("Ucm.Infrastructure.Data.Models.AppUserEF", "FromUser")
+                        .WithMany()
+                        .HasForeignKey("FromUserId");
+
                     b.HasOne("Ucm.Infrastructure.Data.Models.AppUserEF", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("FromUser");
 
                     b.Navigation("User");
                 });

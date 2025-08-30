@@ -38,5 +38,9 @@ namespace Ucm.Domain.IRepositories.Chat
     /// Lấy danh sách lời mời kết bạn đã gửi bởi user
     /// </summary>
     Task<List<FriendRequest>> GetSentRequestsAsync(Guid userId);
+        /// <summary>
+        /// Lấy chi tiết một lời mời kết bạn theo Id
+        /// </summary>
+        Task<FriendRequest?> GetByIdAsync(Guid id);
     }
 }

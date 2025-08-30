@@ -3,28 +3,21 @@
 import React from "react";
 import { FiUser, FiGift, FiShoppingCart, FiPlus, FiX } from "react-icons/fi";
 
-const dms = [
-  { id: "1", username: ">>VTH<<", avatar: "https://randomuser.me/api/portraits/men/11.jpg", discord: true },
-  { id: "2", username: "ManhHungdz", avatar: "https://randomuser.me/api/portraits/men/12.jpg", online: true },
-  { id: "3", username: "dangkhuong0402", avatar: "https://randomuser.me/api/portraits/men/13.jpg", online: false },
-  { id: "4", username: "khuongm152", avatar: "https://randomuser.me/api/portraits/men/14.jpg", online: false },
-  { id: "5", username: "khánh dep trai vcll", avatar: "https://randomuser.me/api/portraits/men/15.jpg", online: false },
-  { id: "6", username: "Khánh đẹp trai vcl", avatar: "https://randomuser.me/api/portraits/men/16.jpg", online: true},
-  { id: "7", username: "Noobie Cheesed Cat", avatar: "https://randomuser.me/api/portraits/men/17.jpg", online: false },
-];
+
 
 const defaultAvatar = "https://ui-avatars.com/api/?name=User&background=5865f2&color=fff&rounded=true&size=64";
 
 interface SidebarFriendsProps {
   onSelectDM: (id: string) => void;
   onMenuClick?: (menu: string) => void;
+  conversations?: any[]; // optional: if provided render conversations instead of sample dms
 }
 
-export default function SidebarFriends({ onSelectDM, onMenuClick }: SidebarFriendsProps) {
+export default function SidebarFriends({ onSelectDM, onMenuClick, conversations }: SidebarFriendsProps) {
   const [search, setSearch] = React.useState("");
   const handleMenu = (menu: string) => {
     if (onMenuClick) onMenuClick(menu);
-  };
+  };  
   return (
     <aside className="w-60 bg-[#23272a] h-full flex flex-col border-r border-[#23272a]">
       {/* Search */}
@@ -59,31 +52,54 @@ export default function SidebarFriends({ onSelectDM, onMenuClick }: SidebarFrien
           <button className="hover:text-white"><FiPlus /></button>
         </div>
         <div className="flex flex-col gap-2">
-          {dms.map(dm => (
-            <div
-              key={dm.id}
-              className={`flex items-center gap-3 px-2 py-2 rounded-2xl cursor-pointer transition relative group ${dm.active ? "bg-[#393c41] shadow-lg" : "hover:bg-[#313338]"}`}
-              onClick={() => onSelectDM(dm.id)}
-            >
-              {/* Discord icon nếu là bot/discord */}
-              {dm.discord ? (
-                <span className="w-10 h-10 rounded-full bg-[#5865F2] flex items-center justify-center shadow-lg">
-                  <svg width="28" height="28" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#5865F2"/><circle cx="20" cy="16" r="7" fill="#fff"/><ellipse cx="20" cy="31" rx="11" ry="6" fill="#fff"/></svg>
-                </span>
-              ) : (
-                <img src={dm.avatar || defaultAvatar} alt={dm.username} className="w-10 h-10 rounded-full border-2 border-[#23272a] object-cover shadow group-hover:scale-105 transition" />
-              )}
-              <span className={`flex-1 text-base truncate ${dm.active ? "text-white font-bold" : "text-gray-200"}`}>{dm.username}</span>
-              {/* Trạng thái online/offline */}
-              {typeof dm.online === "boolean" && (
-                <span className={`w-3 h-3 rounded-full border-2 border-[#23272a] ${dm.online ? "bg-green-500" : "bg-gray-500"} ml-1`} />
-              )}
-              {/* Nút đóng */}
-              {dm.active && (
-                <button className="ml-2 text-gray-400 hover:text-white opacity-80 group-hover:opacity-100"><FiX size={18} /></button>
-              )}
-            </div>
-          ))}
+          {(() => {
+            const list = (conversations && conversations.length) ? conversations : [];
+            if (list.length === 0) {
+              return (
+                <div className="text-gray-400 text-center py-8">Bạn chưa có cuộc trò chuyện — bắt đầu bằng cách tìm hoặc thêm bạn.</div>
+              );
+            }
+
+            return list.map((item: any) => {
+              const isConv = !!(item.members);
+              const meId = typeof window !== 'undefined' ? localStorage.getItem('userId') || '' : '';
+              const avatar = isConv ? (item.avatarUrl ?? (item.members && item.members[0] ? item.members[0].avatarUrl : null)) : (item.avatar ?? null);
+              const title = isConv ? (item.name ?? (item.members && item.members.find((m: any) => m.id !== meId)?.username) ?? (item.members && item.members[0]?.username) ?? 'Cuộc trò chuyện') : (item.username ?? 'Người dùng');
+              const online = item.online ?? false;
+              const active = item.active ?? false;
+              const unread = item.unreadCount ?? 0;
+
+              return (
+                <div
+                  key={item.id}
+                  className={`flex items-center gap-3 px-2 py-2 rounded-2xl cursor-pointer transition relative group ${active ? "bg-[#393c41] shadow-lg" : "hover:bg-[#313338]"}`}
+                  onClick={() => onSelectDM(item.id)}
+                >
+                  {item.discord ? (
+                    <span className="w-10 h-10 rounded-full bg-[#5865F2] flex items-center justify-center shadow-lg">
+                      <svg width="28" height="28" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#5865F2"/><circle cx="20" cy="16" r="7" fill="#fff"/><ellipse cx="20" cy="31" rx="11" ry="6" fill="#fff"/></svg>
+                    </span>
+                  ) : (
+                    <img src={avatar ?? defaultAvatar} alt={title} className="w-10 h-10 rounded-full border-2 border-[#23272a] object-cover shadow group-hover:scale-105 transition" />
+                  )}
+
+                  <span className={`flex-1 text-base truncate ${active ? "text-white font-bold" : "text-gray-200"}`}>{title}</span>
+
+                  {typeof online === "boolean" && (
+                    <span className={`w-3 h-3 rounded-full border-2 border-[#23272a] ${online ? "bg-green-500" : "bg-gray-500"} ml-1`} />
+                  )}
+
+                  {unread > 0 && (
+                    <div className="ml-2 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5">{unread}</div>
+                  )}
+
+                  {active && (
+                    <button className="ml-2 text-gray-400 hover:text-white opacity-80 group-hover:opacity-100"><FiX size={18} /></button>
+                  )}
+                </div>
+              );
+            });
+          })()}
         </div>
       </div>
     </aside>

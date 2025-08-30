@@ -1,3 +1,4 @@
+       
 using Microsoft.EntityFrameworkCore;
 using Ucm.Domain.Entities;
 using Ucm.Domain.Entities.Chat;
@@ -17,9 +18,11 @@ namespace Ucm.Infrastructure.Repositories.Chat
 
         public async Task<bool> ExistsAsync(Guid fromUserId, Guid toUserId)
         {
+            // Chỉ kiểm tra các request đang chờ (Status == 0)
             return await _context.FriendRequests.AnyAsync(x =>
-                (x.FromUserId == fromUserId && x.ToUserId == toUserId) ||
-                (x.FromUserId == toUserId && x.ToUserId == fromUserId));
+                ((x.FromUserId == fromUserId && x.ToUserId == toUserId) ||
+                 (x.FromUserId == toUserId && x.ToUserId == fromUserId))
+                && x.Status == 0);
         }
 
         public async Task AddAsync(FriendRequest request)
@@ -89,6 +92,13 @@ namespace Ucm.Infrastructure.Repositories.Chat
                 .Where(x => x.FromUserId == userId && x.Status == 0)
                 .ToListAsync();
             return list.Select(ef => Common.Mappers.FriendRequestEntityEfMapper.ToEntity(ef)).ToList();
+        }
+
+         public async Task<FriendRequest?> GetByIdAsync(Guid id)
+        {
+            var ef = await _context.FriendRequests.Include(x => x.FromUser).Include(x => x.ToUser).FirstOrDefaultAsync(x => x.Id == id);
+            if (ef == null) return null;
+            return Common.Mappers.FriendRequestEntityEfMapper.ToEntity(ef);
         }
     }
 }

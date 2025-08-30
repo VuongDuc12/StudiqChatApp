@@ -13,6 +13,7 @@ using Ucm.Domain.IRepositories.Chat;
 using Ucm.Infrastructure.Common.Mappers;
 using Ucm.Infrastructure.Data;
 using Ucm.Infrastructure.Data.Models;
+using Ucm.Infrastructure.Data.Repositories.Chat;
 using Ucm.Infrastructure.Repositories;
 using Ucm.Infrastructure.Repositories.Chat;
 
@@ -37,6 +38,9 @@ namespace Ucm.Infrastructure
             services.AddScoped<IStudyLogRepository, StudyLogRepository>();
             services.AddScoped<IFriendRepository, FriendRepository>();
             services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
+            services.AddScoped<IChatNotificationRepository, ChatNotificationRepository>();
+            // Chat conversation
+            services.AddScoped<Ucm.Domain.IRepositories.Chat.IConversationRepository, Ucm.Infrastructure.Data.Repositories.Chat.ConversationRepository>();
 
             services.AddScoped<IEntityEfMapper<Course, CourseEf>, CourseEntityEfMapper>();
             services.AddScoped<IEntityEfMapper<CourseTopic, CourseTopicEf>, CourseTopicEntityEfMapper>();
@@ -45,7 +49,6 @@ namespace Ucm.Infrastructure
             services.AddScoped<IEntityEfMapper<StudyTask, StudyTaskEf>, StudyTaskEntityEfMapper>();
             services.AddScoped<IEntityEfMapper<StudyLog, StudyLogEf>, StudyLogEntityEfMapper>();
             services.AddScoped<IEntityEfMapper<TaskResource, TaskResourceEf>, TaskResourceEntityEfMapper>();
-
             return services;
         }
     }

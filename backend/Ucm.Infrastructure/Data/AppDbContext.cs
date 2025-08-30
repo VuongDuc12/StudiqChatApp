@@ -72,6 +72,8 @@ namespace Ucm.Infrastructure.Data
                 .WithMany()
                 .HasForeignKey(e => e.CreatedBy)
                 .OnDelete(DeleteBehavior.Restrict);
+            entity.HasIndex(e => e.CreatedAt);
+            entity.HasIndex(e => e.LastMessageAt);
         });
 
         builder.Entity<ConversationMemberEf>(entity =>
@@ -86,6 +88,7 @@ namespace Ucm.Infrastructure.Data
                 .WithMany()
                 .HasForeignKey(e => e.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+            entity.HasIndex(e => new { e.ConversationId, e.UserId }).IsUnique();
         });
 
         builder.Entity<MessageEf>(entity =>
@@ -104,6 +107,7 @@ namespace Ucm.Infrastructure.Data
                 .WithMany()
                 .HasForeignKey(e => e.ReplyToMessageId)
                 .OnDelete(DeleteBehavior.SetNull);
+            entity.HasIndex(e => new { e.ConversationId, e.CreatedAt });
         });
 
         builder.Entity<ChatNotificationEf>(entity =>

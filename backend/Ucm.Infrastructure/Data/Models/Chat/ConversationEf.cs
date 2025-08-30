@@ -13,7 +13,12 @@ namespace Ucm.Infrastructure.Data.Models.Chat
         public Guid CreatedBy { get; set; }
         public AppUserEF Creator { get; set; }
         public DateTime CreatedAt { get; set; }
-        public ICollection<ConversationMemberEf> Members { get; set; }
-        public ICollection<MessageEf> Messages { get; set; }
+    public ICollection<ConversationMemberEf> Members { get; set; } = new List<ConversationMemberEf>();
+    public ICollection<MessageEf> Messages { get; set; } = new List<MessageEf>();
+
+    // preview fields for fast conversation list
+    public Guid? LastMessageId { get; set; }
+    public string? LastMessagePreview { get; set; }
+    public DateTime? LastMessageAt { get; set; }
     }
 }

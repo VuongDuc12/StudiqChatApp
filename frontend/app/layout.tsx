@@ -24,9 +24,39 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="vi">
       <body className={`${inter.variable} ${geistMono.variable} antialiased`}>
         <Toaster
-          position="bottom-right"
-         
-        />
+  position="bottom-right"
+  toastOptions={{
+    style: {
+      borderRadius: '10px',
+      background: '#23272a',
+      color: '#fff',
+      fontSize: '1rem',
+      border: '1px solid #5865f2',
+      boxShadow: '0 4px 24px #0004',
+      padding: '16px 20px',
+      minWidth: 220,
+      maxWidth: 350,
+    },
+    success: {
+      iconTheme: {
+        primary: '#4ade80',
+        secondary: '#23272a',
+      },
+      style: {
+        border: '1px solid #4ade80',
+      },
+    },
+    error: {
+      iconTheme: {
+        primary: '#f87171',
+        secondary: '#23272a',
+      },
+      style: {
+        border: '1px solid #f87171',
+      },
+    },
+  }}
+/>
         {children}
       </body>
     </html>
